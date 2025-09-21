@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vediedu - Create Course</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for the "living background" effect */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Combined background gradient and animation */
+        .living-background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #134e5e, #71b280, #2dd4bf, #06b6d4, #3b82f6, #1e40af);
+            background-size: 600% 600%;
+            animation: livingGradient 12s ease infinite;
+            z-index: -20;
+        }
+
+        @keyframes livingGradient {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 50% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+            animation: floatOrb 8s ease-in-out infinite;
+            backdrop-filter: blur(2px);
+            z-index: -10;
+        }
+        
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, -30px) rotate(90deg); }
+            50% { transform: translate(-30px, 50px) rotate(180deg); }
+            75% { transform: translate(-50px, -20px) rotate(270deg); }
+        }
+        
+        .orb:nth-child(1) { width: 120px; height: 120px; top: 20%; left: 15%; animation-delay: 0s; }
+        .orb:nth-child(2) { width: 80px; height: 80px; top: 60%; left: 80%; animation-delay: -2s; }
+        .orb:nth-child(3) { width: 150px; height: 150px; top: 70%; left: 20%; animation-delay: -4s; }
+        .orb:nth-child(4) { width: 100px; height: 100px; top: 10%; left: 70%; animation-delay: -6s; }
+        .orb:nth-child(5) { width: 60px; height: 60px; top: 40%; left: 50%; animation-delay: -3s; }
+        
+        /* Morphing shapes */
+        .morphing-shape {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            animation: morph 15s ease-in-out infinite;
+            backdrop-filter: blur(1px);
+            z-index: -10;
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 50%; transform: rotate(0deg) scale(1); }
+            25% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: rotate(90deg) scale(1.2); }
+            50% { border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%; transform: rotate(180deg) scale(0.8); }
+            75% { border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; transform: rotate(270deg) scale(1.1); }
+            100% { border-radius: 50%; transform: rotate(360deg) scale(1); }
+        }
+        
+        .morphing-shape:nth-child(6) { width: 200px; height: 200px; top: 30%; left: 10%; animation-delay: -1s; }
+        .morphing-shape:nth-child(7) { width: 150px; height: 150px; top: 50%; right: 15%; animation-delay: -5s; }
+
+        .form-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-1px rgba(0, 0, 0, 0.06);
+        }
+
+        .input-success {
+            border-width: 3px;
+            border-image: linear-gradient(to right, #10b981, #22c55e); /* Green gradient */
+            border-image-slice: 1;
+            box-shadow: 0 0 10px #22c55e, 0 0 20px #22c55e;
+            transition: border-image 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .input-error {
+            border-width: 3px;
+            border-image: linear-gradient(to right, #ef4444, #dc2626); /* Red gradient */
+            border-image-slice: 1;
+            box-shadow: 0 0 10px #dc2626, 0 0 20px #dc2626;
+            transition: border-image 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        input, textarea, select {
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        /* Collapsible panels for copilots */
+        .copilot-panel {
+            border-radius: 12px;
+            border: 1.5px solid rgba(255,255,255,0.12);
+            background-color: rgba(31,41,55,0.80); /* Gray-800/80 */
+        }
+        input {
+            transition: border-color 0.3s ease-in-out;
+        }
+        /* Hide up/down arrow in summary/details */
+        summary::-webkit-details-marker { display:none; }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col p-4">
+
+    <div class="living-background-container">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+        
+        <div class="morphing-shape"></div>
+        <div class="morphing-shape"></div>
+    </div>
+    
+    <header class="relative z-10 flex items-center justify-between p-4 mb-8 bg-gray-900/50 backdrop-blur-lg rounded-xl border-2 border-white/20">
+        <a href="dashboard.html" class="text-white py-2 px-4 rounded-lg font-semibold hover:bg-white/10 transition-colors">
+            &larr; Back to Dashboard
+        </a>
+        <h1 class="text-3xl font-bold text-white text-center flex-1">Create New Course</h1>
+        <div class="w-[124px]"></div>
+    </header>
+
+    <main class="relative z-10 flex-1 w-full max-w-4xl mx-auto p-4 flex items-center justify-center">
+        <div id="create-course-card" class="form-card bg-gray-900/50 backdrop-blur-lg rounded-xl p-8 border-2 border-white/20 w-full">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Course Details</h2>
+            <form id="generate-course-form">
+                <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Basic Course Info</h3>
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="course-name" class="block text-white/70 text-sm font-medium mb-2">Course Name</label>
+                        <input type="text" id="course-name" name="courseName" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="e.g., Introduction to Python" required>
+                    </div>
+                    <div>
+                        <label for="course-category" class="block text-white/70 text-sm font-medium mb-2">Course Category</label>
+                        <select id="course-category" name="courseCategory" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500" required>
+                            <option value="">Select a Category</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Science">Science</option>
+                            <option value="Business">Business</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Health">Health</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="course-duration" class="block text-white/70 text-sm font-medium mb-2">Course Duration</label>
+                        <input type="text" id="course-duration" name="courseDuration" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="e.g., 4 weeks, 10 hours total" required>
+                    </div>
+                    <div>
+                        <label for="target-audience" class="block text-white/70 text-sm font-medium mb-2">Target Audience</label>
+                        <select id="target-audience" name="targetAudience" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500" required>
+                            <option value="">Select Audience</option>
+                            <option value="Beginners">Beginners</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="course-description" class="block text-white/70 text-sm font-medium mb-2">Course Description</label>
+                    <textarea id="course-description" name="courseDescription" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500 h-24" placeholder="Overview of what learners will get" required></textarea>
+                </div>
+                <div class="mb-6">
+                    <label for="course-objectives" class="block text-white/70 text-sm font-medium mb-2">Course Objectives / Learning Outcomes</label>
+                    <textarea id="course-objectives" name="courseObjectives" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500 h-24" placeholder="Enter as a comma-separated list or bullet points. E.g., Learn data types, Understand functions, Build a simple app." required></textarea>
+                </div>
+
+                <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2 mt-6">Instructor Details</h3>
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="instructor-name" class="block text-white/70 text-sm font-medium mb-2">Instructor Name</label>
+                        <input type="text" id="instructor-name" name="instructorName" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="e.g., Jane Doe" required>
+                    </div>
+                    <div>
+                        <label for="instructor-photo" class="block text-white/70 text-sm font-medium mb-2">Instructor Photo</label>
+                        <input type="file" id="instructor-photo" name="instructorPhoto" class="w-full text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label for="instructor-bio" class="block text-white/70 text-sm font-medium mb-2">Instructor Bio</label>
+                    <textarea id="instructor-bio" name="instructorBio" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500 h-24" placeholder="Short description, qualifications" required></textarea>
+                </div>
+
+                <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2 mt-6">Course Content Upload (UI only)</h3>
+                <p class="text-sm text-gray-400 mb-4">Note: This is a placeholder UI. Actual file upload functionality requires a backend.</p>
+                <div class="mb-4">
+                    <label for="lecture-title" class="block text-white/70 text-sm font-medium mb-2">Lecture Title</label>
+                    <input type="text" id="lecture-title" name="lectureTitle" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="e.g., Unit 1: Basics of Python">
+                </div>
+                <div class="mb-4">
+                    <label for="lecture-content" class="block text-white/70 text-sm font-medium mb-2">Lecture Content (Text)</label>
+                    <textarea id="lecture-content" name="lectureContent" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500 h-32" placeholder="Paste lecture notes or script here"></textarea>
+                </div>
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label for="upload-files" class="block text-white/70 text-sm font-medium mb-2">Upload Files (PDFs, PPTs)</label>
+                        <input type="file" id="upload-files" name="uploadFiles" class="w-full text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    </div>
+                    <div>
+                        <label for="upload-videos" class="block text-white/70 text-sm font-medium mb-2">Upload Videos (mp4)</label>
+                        <input type="file" id="upload-videos" name="uploadVideos" class="w-full text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    </div>
+                    <div>
+                        <label for="upload-audio" class="block text-white/70 text-sm font-medium mb-2">Upload Audio</label>
+                        <input type="file" id="upload-audio" name="uploadAudio" class="w-full text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2 mt-6">Copilot Modules (Preview)</h3>
+
+            <details class="copilot-panel mb-4 p-4">
+                <summary class="flex items-center cursor-pointer space-x-2 mb-2 text-lg font-semibold text-cyan-300 hover:text-cyan-200">
+                    <span>&#x1F4C4;</span>
+                    <span>Course Structure Copilot</span>
+                </summary>
+                <div class="mt-2 space-y-2">
+                    <label class="block text-white/70 text-sm mb-1">Suggest Syllabus & Modules:</label>
+                    <textarea id="syllabus-output" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-20" placeholder="Copilot generates syllabus, modules, lessons..." readonly></textarea>
+                    <button id="generate-syllabus-btn" type="button" class="w-full bg-cyan-600 text-white py-2 rounded-lg font-semibold hover:bg-cyan-700 transition-colors">Auto-Generate</button>
+                    <label class="block text-white/70 text-sm mb-1">Learning Outcomes:</label>
+                    <textarea id="outcomes-output" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-12" placeholder="Objectives, assessment outline, etc..." readonly></textarea>
+                    <button id="generate-outcomes-btn" type="button" class="w-full bg-cyan-600 text-white py-2 rounded-lg font-semibold hover:bg-cyan-700 transition-colors">Auto-Generate</button>
+                </div>
+            </details>
+
+            <details class="copilot-panel mb-4 p-4">
+                <summary class="flex items-center cursor-pointer space-x-2 mb-2 text-lg font-semibold text-green-300 hover:text-green-200">
+                    <span>&#x1F310;</span>
+                    <span>Language Copilot (Multilingual)</span>
+                </summary>
+                <div class="mt-2 space-y-2">
+                    <label class="block text-white/70 text-sm mb-1">Translate PDF Content:</label>
+                    <input type="file" id="pdf-to-translate" accept=".pdf" class="w-full text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    <select id="translation-language" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700">
+                        <option value="">Select Language</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="bn">Bengali</option>
+                        <option value="mr">Marathi</option>
+                        <option value="ml">Malayalam</option>
+                        <option value="te">Telugu</option>
+                        <option value="kn">Kannada</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="pa">Punjabi</option>
+                    </select>
+                    <button id="translate-pdf-btn" type="button" class="w-full bg-green-600 py-2 px-3 rounded-lg hover:bg-green-700 text-white font-semibold">Translate PDF</button>
+                    <textarea id="translated-text-output" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-24" placeholder="Translated content will appear here..." readonly></textarea>
+                </div>
+            </details>
+
+            <details class="copilot-panel mb-4 p-4">
+                <summary class="flex items-center cursor-pointer space-x-2 mb-2 text-lg font-semibold text-blue-300 hover:text-blue-200">
+                    <span>&#x1F5BC;</span>
+                    <span>Content Enhancement Copilot</span>
+                </summary>
+                <div class="mt-2 space-y-2">
+                    <label class="block text-white/70 text-sm mb-1">Visual Assets Suggestions:</label>
+                    <div class="flex gap-2">
+                        <button id="generate-image-btn" type="button" class="bg-blue-600 py-2 px-3 rounded-lg hover:bg-blue-700 text-white text-sm">Generate Image</button>
+                        <button id="add-diagram-btn" type="button" class="bg-cyan-600 py-2 px-3 rounded-lg hover:bg-cyan-700 text-white text-sm">Add Diagram</button>
+                        <button id="infographic-btn" type="button" class="bg-fuchsia-600 py-2 px-3 rounded-lg hover:bg-fuchsia-700 text-white text-sm">Infographic</button>
+                        <button id="suggest-slides-btn" type="button" class="bg-yellow-600 py-2 px-3 rounded-lg hover:bg-yellow-700 text-white text-sm">Suggest Slides</button>
+                    </div>
+                </div>
+            </details>
+            
+            <details class="copilot-panel mb-4 p-4">
+                <summary class="flex items-center cursor-pointer space-x-2 mb-2 text-lg font-semibold text-pink-300 hover:text-pink-200">
+                    <span>&#x1F3A4;</span>
+                    <span>Voice & Audio Copilot</span>
+                </summary>
+                <div class="mt-2 space-y-2">
+                    <label class="block text-white/70 text-sm mb-1">Text to Speech:</label>
+                    <button id="text-to-speech-btn" type="button" class="bg-pink-600 py-2 px-3 rounded-lg hover:bg-pink-700 text-white font-semibold">Play Lecture Content</button>
+                    <label class="block text-white/70 text-sm mt-3 mb-1">ASR: Record & Transcribe:</label>
+                    <button id="start-recording-btn" type="button" class="bg-purple-600 py-2 px-3 rounded-lg hover:bg-purple-700 text-white font-semibold">Start Recording</button>
+                    <textarea id="transcribed-text" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-24 mt-2" placeholder="Transcribed lecture text appears here..." readonly></textarea>
+                    <label class="block text-white/70 text-sm mt-3 mb-1">Voice Dubbing:</label>
+                    <select id="dubbing-language" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700">
+                        <option value="">Select Dubbing Language</option>
+                        <option value="en-IN">English (India)</option>
+                        <option value="hi-IN">Hindi (India)</option>
+                        <option value="ta-IN">Tamil (India)</option>
+                        <option value="bn-IN">Bengali (India)</option>
+                        <option value="ml-IN">Malayalam (India)</option>
+                        <option value="te-IN">Telugu (India)</option>
+                    </select>
+                    <button id="dub-voice-btn" type="button" class="w-full bg-orange-600 py-2 px-3 rounded-lg hover:bg-orange-700 text-white font-semibold">Dub Voice</button>
+                </div>
+            </details>
+
+            <details class="copilot-panel mb-4 p-4">
+                <summary class="flex items-center cursor-pointer space-x-2 mb-2 text-lg font-semibold text-yellow-300 hover:text-yellow-200">
+                    <span>&#x1F4DD;</span>
+                    <span>Notes & Assessment Copilot</span>
+                </summary>
+                <div class="mt-2 space-y-2">
+                    <label class="block text-white/70 text-sm mb-1">Lecture Notes:</label>
+                    <textarea id="generated-notes" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-12" placeholder="Copilot generates notes/summaries..." readonly></textarea>
+                    <button id="generate-notes-btn" type="button" class="w-full bg-yellow-600 py-2 px-3 rounded-lg hover:bg-yellow-700 text-white font-semibold">Generate Notes</button>
+                    
+                    <label class="block text-white/70 text-sm mt-3 mb-1">Quizzes / Flashcards:</label>
+                    <textarea id="generated-quiz" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-12" placeholder="Copilot-generated quiz preview or flashcard list..." readonly></textarea>
+                    <button id="generate-quiz-btn" type="button" class="w-full bg-yellow-600 py-2 px-3 rounded-lg hover:bg-yellow-700 text-white font-semibold">Generate Quiz</button>
+                    
+                    <label class="block text-white/70 text-sm mt-3 mb-1">Slide Text / Handouts:</label>
+                    <textarea id="generated-handouts" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 h-12" placeholder="Handout text/slide content suggestions" readonly></textarea>
+                    <button id="generate-handouts-btn" type="button" class="w-full bg-yellow-600 py-2 px-3 rounded-lg hover:bg-yellow-700 text-white font-semibold">Generate Handouts</button>
+                </div>
+            </details>
+
+                <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2 mt-6">Assessment & Engagement</h3>
+                <div class="mb-4">
+                    <label for="quiz-upload" class="block text-white/70 text-sm font-medium mb-2">Quiz/Assignments Upload (PDF)</label>
+                    <input type="file" id="quiz-upload" name="quizUpload" accept=".pdf" class="w-full text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                </div>
+                <div class="flex items-center mb-6">
+                    <input type="checkbox" id="completion-certificate" name="completionCertificate" class="h-4 w-4 text-blue-600 border-gray-700 rounded focus:ring-blue-500 bg-gray-800">
+                    <label for="completion-certificate" class="ml-2 text-white">Issue Course Completion Certificate</label>
+                </div>
+
+                <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2 mt-6">Publishing Details</h3>
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label for="course-price" class="block text-white/70 text-sm font-medium mb-2">Course Price</label>
+                        <input type="number" id="course-price" name="coursePrice" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-blue-500" placeholder="e.g., 99.99">
+                    </div>
+                    <div>
+                        <label for="course-level" class="block text-white/70 text-sm font-medium mb-2">Course Level</label>
+                        <select id="course-level" name="courseLevel" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500" required>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="course-visibility" class="block text-white/70 text-sm font-medium mb-2">Visibility</label>
+                        <select id="course-visibility" name="courseVisibility" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-blue-500" required>
+                            <option value="Draft">Draft</option>
+                            <option value="Public">Public</option>
+                            <option value="Private">Private</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" id="generate-button" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-6">
+                    Generate Course Outline
+                </button>
+            </form>
+        </div>
+        
+        <div id="loading-spinner" class="hidden mt-4 text-center absolute">
+            <div class="animate-spin inline-block w-12 h-12 border-4 border-white/30 border-t-white rounded-full"></div>
+            <p class="text-white mt-4 text-lg">Generating course outline...</p>
+        </div>
+
+        <div id="generated-course-content" class="hidden form-card bg-gray-900/50 backdrop-blur-lg rounded-xl p-8 border-2 border-white/20 w-full max-w-4xl">
+            <h2 class="text-2xl font-bold text-white mb-4 text-center">Generated Course Outline</h2>
+            <div id="outline-details" class="text-sm text-gray-300"></div>
+            <button id="save-course-button" class="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors mt-6">Save Course</button>
+        </div>
+    </main>
+
+<script type="module">
+    // ---------------------------
+    // Form Handling & Data Save
+    // ---------------------------
+    document.getElementById("generate-course-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Collect all form data, including new fields
+        const courseData = {
+            courseId: new Date().getTime().toString(), 
+            name: document.getElementById("course-name").value || "",
+            category: document.getElementById("course-category").value || "",
+            duration: document.getElementById("course-duration").value || "",
+            audience: document.getElementById("target-audience").value || "",
+            description: document.getElementById("course-description").value || "",
+            objectives: document.getElementById("course-objectives").value || "",
+            instructor: {
+                name: document.getElementById("instructor-name").value || "",
+                bio: document.getElementById("instructor-bio").value || "",
+            },
+            lecture: {
+                title: document.getElementById("lecture-title").value || "",
+                content: document.getElementById("lecture-content").value || "",
+            },
+            price: document.getElementById("course-price").value || "",
+            level: document.getElementById("course-level").value || "",
+            visibility: document.getElementById("course-visibility").value || "Private",
+            issueCertificate: document.getElementById("completion-certificate").checked,
+            createdAt: new Date().toISOString()
+        };
+
+        // Save to localStorage
+        let courses = JSON.parse(localStorage.getItem("courses")) || [];
+        courses.push(courseData);
+        localStorage.setItem("courses", JSON.stringify(courses));
+
+        alert("✅ Course created successfully!");
+        window.location.href = "dashboard.html";
+    });
+
+    // ---------------------------
+    // Copilot Functionality
+    // ---------------------------
+    
+    // --- 1. Course Structure Copilot ---
+    document.getElementById("generate-syllabus-btn").addEventListener("click", () => {
+        const courseName = document.getElementById("course-name").value;
+        if (!courseName) {
+            alert("Please enter a Course Name first.");
+            return;
+        }
+        // Simulating API call to Sarvam for syllabus generation
+        document.getElementById("syllabus-output").value = `Module 1: Introduction to ${courseName}\n- Lesson 1.1: Basics\n- Lesson 1.2: Advanced Topics\nModule 2: Project Work`;
+    });
+
+    document.getElementById("generate-outcomes-btn").addEventListener("click", () => {
+        const courseName = document.getElementById("course-name").value;
+        if (!courseName) {
+            alert("Please enter a Course Name first.");
+            return;
+        }
+        // Simulating API call to Sarvam for outcomes
+        document.getElementById("outcomes-output").value = `- Understand the core concepts of ${courseName}\n- Apply skills to solve real-world problems\n- Build a final project`;
+    });
+
+    // --- 2. Language Copilot (PDF Translation) ---
+    document.getElementById("translate-pdf-btn").addEventListener("click", () => {
+        const pdfFile = document.getElementById("pdf-to-translate").files[0];
+        const lang = document.getElementById("translation-language").value;
+        if (!pdfFile || !lang) {
+            alert("Please select a PDF file and a language.");
+            return;
+        }
+        // This is where a real API call would happen.
+        // We'll simulate the response.
+        alert(`Request to translate '${pdfFile.name}' to ${lang} sent to Sarvam API. Translated content will appear below.`);
+        document.getElementById("translated-text-output").value = "This is a placeholder for the translated text from your PDF. A real API would return the actual content here.";
+    });
+
+    // --- 3. Content Enhancement Copilot ---
+    document.getElementById("generate-image-btn").addEventListener("click", () => {
+        alert("Simulating Sarvam API call: Generating an image based on course description...");
+    });
+    document.getElementById("add-diagram-btn").addEventListener("click", () => {
+        alert("Simulating Sarvam API call: Generating a diagram...");
+    });
+    document.getElementById("infographic-btn").addEventListener("click", () => {
+        alert("Simulating Sarvam API call: Generating an infographic...");
+    });
+    document.getElementById("suggest-slides-btn").addEventListener("click", () => {
+        alert("Simulating Sarvam API call: Suggesting slide templates and content...");
+    });
+
+    
+    // --- 4. Voice & Audio Copilot (Functional Demo) ---
+    
+    // Text-to-Speech
+    document.getElementById("text-to-speech-btn").addEventListener("click", () => {
+        const lectureContent = document.getElementById("lecture-content").value;
+        if (!lectureContent) {
+            alert("Please add content to the 'Lecture Content' box first.");
+            return;
+        }
+        const utterance = new SpeechSynthesisUtterance(lectureContent);
+        // You can adjust language, rate, etc., here
+        utterance.lang = 'en-US';
+        speechSynthesis.speak(utterance);
+    });
+
+    // Live Recording & Transcription
+    let recognition;
+    const startRecordingBtn = document.getElementById('start-recording-btn');
+    const transcribedTextarea = document.getElementById('transcribed-text');
+    
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false; // Stop after a pause
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = () => {
+            startRecordingBtn.textContent = 'Stop Recording...';
+            startRecordingBtn.classList.add('animate-pulse');
+        };
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            transcribedTextarea.value += transcript + '. ';
+        };
+        
+        recognition.onend = () => {
+            startRecordingBtn.textContent = 'Start Recording';
+            startRecordingBtn.classList.remove('animate-pulse');
+        };
+        
+        startRecordingBtn.addEventListener('click', () => {
+            if (startRecordingBtn.textContent === 'Start Recording') {
+                recognition.start();
+            } else {
+                recognition.stop();
+            }
+        });
+    } else {
+        startRecordingBtn.disabled = true;
+        startRecordingBtn.textContent = 'Recording Not Supported';
+        alert('Your browser does not support Web Speech Recognition.');
+    }
+
+    // Voice Dubbing (Simulation)
+    document.getElementById("dub-voice-btn").addEventListener("click", () => {
+        const content = transcribedTextarea.value || document.getElementById("lecture-content").value;
+        const lang = document.getElementById("dubbing-language").value;
+        if (!content || !lang) {
+            alert("Please record or enter content and select a dubbing language.");
+            return;
+        }
+        alert(`Simulating Sarvam API call: Dubbing content to ${lang}.`);
+        // In a real app, this would send audio/text to Sarvam for dubbing.
+    });
+    
+    // --- 5. Notes & Assessment Copilot ---
+    document.getElementById("generate-notes-btn").addEventListener("click", () => {
+        const lectureContent = document.getElementById("lecture-content").value;
+        if (!lectureContent) {
+            alert("Please add lecture content first.");
+            return;
+        }
+        alert("Simulating Sarvam API call: Generating notes from lecture content.");
+        document.getElementById("generated-notes").value = "Key points: Introduction to topic, Main concepts, Summary of lecture.";
+    });
+    
+    document.getElementById("generate-quiz-btn").addEventListener("click", () => {
+        const lectureContent = document.getElementById("lecture-content").value;
+        if (!lectureContent) {
+            alert("Please add lecture content first.");
+            return;
+        }
+        alert("Simulating Sarvam API call: Generating a quiz from lecture content.");
+        document.getElementById("generated-quiz").value = "Q1: What is the main idea?\nQ2: What is the difference between X and Y?\nQ3: True or False?";
+    });
+
+    document.getElementById("generate-handouts-btn").addEventListener("click", () => {
+        const lectureContent = document.getElementById("lecture-content").value;
+        if (!lectureContent) {
+            alert("Please add lecture content first.");
+            return;
+        }
+        alert("Simulating Sarvam API call: Generating handouts and slide suggestions.");
+        document.getElementById("generated-handouts").value = "Slide 1: Title\nSlide 2: Main Points\nSlide 3: Q&A";
+    });
+</script>
+</body>
+</html>
+                
