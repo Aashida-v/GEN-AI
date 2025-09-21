@@ -384,6 +384,22 @@
     // ---------------------------
     // Form Handling & Data Save
     // ---------------------------
+
+    const inputs = document.querySelectorAll('#generate-course-form input, #generate-course-form textarea, #generate-course-form select');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                if (input.type === 'file') return; // Skip file inputs
+
+                if (input.value.trim() === '') {
+                    input.classList.remove('input-success');
+                    input.classList.add('border-gray-700');
+                } else {
+                    input.classList.add('input-success');
+                    input.classList.remove('border-gray-700');
+                }
+            });
+        });
+
     document.getElementById("generate-course-form").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -573,4 +589,5 @@
 </script>
 </body>
 </html>
+
                 
